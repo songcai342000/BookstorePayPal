@@ -1,0 +1,113 @@
+﻿@model IEnumerable<PayPalPaymentIntergration.Models.CartItem>
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Order</h4>
+    <hr />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Title)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Price)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ImageUrl)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Quantity)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Total)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ImageUrl)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td class="total">
+                        @Html.DisplayFor(modelItem => item.Total)
+                    </td>
+                    <td>
+                      
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    <div id="checkout"></div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<script src="https://www.paypal.com/sdk/js?client-id=AWduqFNet_25HUONAefCkkGFjnz-Bvhaax5pu6gGjqRDdhpgbTxLOWCTB2UpXrcH1g6la8mvWclddJdL"></script>
+
+<script>
+    let totals = document.getElementsByClassName('total');
+    let v = 0;
+    for (let i = 0; i < totals.length; i++)
+    {
+        v += parseInt(totals[i].innerHTML);
+    }
+    v.toString();
+    alert(v);
+    paypal.Buttons(
+        {
+            createOrder: function (data, actions) {
+
+            // This function sets up the details of the transaction, including the amount and line item details.
+
+            return actions.order.create({
+
+            purchase_units: [{
+
+                amount: {
+
+                    value: v
+
+                    }
+
+                }]
+
+            });
+
+        },
+        onApprove: function (data, actions) {
+
+            // This function captures the funds from the transaction.
+
+            return actions.order.capture().then(function (details) {
+
+                // This function shows a transaction success message to your buyer.
+
+                alert('Transaction completed by ' + details.payer.name.given_name);
+
+            });
+
+        }
+    }
+    ).render('#checkout');
+
+</script>
