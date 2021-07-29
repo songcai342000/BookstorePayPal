@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace PayPalPaymentIntergration
 {
     public class Startup
@@ -61,6 +62,8 @@ namespace PayPalPaymentIntergration
                 options.User.RequireUniqueEmail = false;
             });
 
+          
+
             services.ConfigureApplicationCookie(options =>
             {
                 // Cookie settings
@@ -82,9 +85,38 @@ namespace PayPalPaymentIntergration
             
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        private async Task CreateUserRoles(IServiceProvider serviceProvider)
         {
+            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var UserManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+            IdentityResult roleResult;
+            //Adding Admin Role
+            var adminRoleCheck = await RoleManager.RoleExistsAsync("Admin");
+            if (!adminRoleCheck)
+            {
+                //create the roles and seed them to the database
+                roleResult = await RoleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+            //Adding Admin Role
+            var memberRoleCheck = await RoleManager.RoleExistsAsync("Member");
+            if (!memberRoleCheck)
+            {
+                //create the roles and seed them to the database
+                roleResult = await RoleManager.CreateAsync(new IdentityRole("Member"));
+            }
+            //Assign Admin role to the main User here we have given our newly registered 
+            //login id for Admin management
+            IdentityUser user = await UserManager.FindByEmailAsync("songcai342000@yahoo.com");
+            var User = new IdentityUser();
+            await UserManager.AddToRoleAsync(user, "Admin");
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services)
+        {
+            CreateUserRoles(services).Wait();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
