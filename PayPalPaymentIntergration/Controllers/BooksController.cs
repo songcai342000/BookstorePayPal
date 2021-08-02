@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,36 @@ namespace PayPalPaymentIntergration.Controllers
     public class BooksController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BooksController(ApplicationDbContext context)
+        public BooksController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Books
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index(int? id)
         {
+            if (id != null)
+            {
+                Order order = new Order { OrderId = 0, UserId = _userManager.GetUserId(HttpContext.User), Status = "Unpaid", OrderTime = DateTime.Now };
+                var orders = _context.Orders.Where(o => o.UserId == order.UserId && o.OrderTime > DateTime.Now.AddDays(-1)).Count();
+                if (ModelState.IsValid && orders == 0)
+                {
+                    _context.Add(order);
+                    await _context.SaveChangesAsync();
+                    //return RedirectToAction(nameof(Index));
+                }
+                var orderId = _context.Orders.Where(o => o.UserId == order.UserId).Select(o => o.OrderId).FirstOrDefault();
+                if (orderId != null)
+                {
+                    Reservation reservation = new Reservation { OrderId = orderId, BookId = (int)id };
+                    _context.Add(reservation);
+                    await _context.SaveChangesAsync();
+                }
+            }
             return View(await _context.Books.ToListAsync());
         }
 
@@ -66,6 +88,31 @@ namespace PayPalPaymentIntergration.Controllers
             }
             return View(book);
         }
+
+        // POST: Books/Index/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /*[HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(int? bookId)
+        {
+            Order order = new Order { UserId = _userManager.GetUserId(HttpContext.User), Status = "Unpaid", OrderTime = DateTime.Now };
+            var orders = _context.Orders.Where(o => o.UserId == order.UserId && o.OrderTime > DateTime.Now.AddDays(-1)).Last();
+            if (ModelState.IsValid && orders == null)
+            {
+                _context.Add(order);
+                await _context.SaveChangesAsync();
+                //return RedirectToAction(nameof(Index));
+            }
+            var orderId = _context.Orders.Where(o => o.UserId == order.UserId).Select(o => o.OrderId).FirstOrDefault();
+           
+            Reservation reservation = new Reservation { OrderId = orderId, BookId = (int)bookId };
+            _context.Add(reservation);
+            await _context.SaveChangesAsync();
+            //return RedirectToAction(nameof(Index));
+
+            return View(await _context.Books.ToListAsync());
+        }*/
 
         // GET: Books/Edit/5
         public async Task<IActionResult> Edit(int? id)

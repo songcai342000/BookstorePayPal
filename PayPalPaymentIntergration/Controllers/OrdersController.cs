@@ -1,8 +1,9 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,23 +12,25 @@ using PayPalPaymentIntergration.Models;
 
 namespace PayPalPaymentIntergration.Controllers
 {
-    [Authorize]
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Orders
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Orders.Include(o => o.Customer);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _context.Orders.ToListAsync());
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Orders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -37,7 +40,6 @@ namespace PayPalPaymentIntergration.Controllers
             }
 
             var order = await _context.Orders
-                .Include(o => o.Customer)
                 .FirstOrDefaultAsync(m => m.OrderId == id);
             if (order == null)
             {
@@ -47,18 +49,42 @@ namespace PayPalPaymentIntergration.Controllers
             return View(order);
         }
 
-        // GET: Orders/Checkout/5
-        public async Task<IActionResult> Checkout(int? id)
+        // GET: Orders/Create
+        public IActionResult Create()
         {
-            if (id == null)
+            return View();
+        }
+
+        // POST: Orders/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("OrderId,UserId,Status,OrderTime")] Order order)
+        {
+            if (ModelState.IsValid)
             {
-                return NotFound();
+                _context.Add(order);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-           
-            var books = (from o in _context.Orders join r in _context.Reservations on o.OrderId equals r.OrderId where o.OrderId == id select r).AsEnumerable().GroupBy(r => r.BookId);
-            var cartItems = from bc in _context.Books.AsEnumerable() 
-                            join bs in books on bc.BookId equals bs.Key 
-                            select new CartItem 
+            return View(order);
+        }
+
+        // GET: Orders/Checkout
+        public async Task<IActionResult> Checkout()
+        {
+     
+            var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
+            if (orders.Count() == 0)
+            {
+                return NotFound("You haven't chosen any item yet!");
+            }
+            var orderId = orders.OrderBy(t => t.OrderTime).Select(d => d.OrderId).Last();
+            var books = (from o in _context.Orders join r in _context.Reservations on o.OrderId equals r.OrderId where o.OrderId == orderId select r).AsEnumerable().GroupBy(r => r.BookId);
+            var cartItems = from bc in _context.Books.AsEnumerable()
+                            join bs in books on bc.BookId equals bs.Key
+                            select new CartItem
                             {
                                 Title = bc.Title,
                                 Price = bc.Price,
@@ -75,30 +101,7 @@ namespace PayPalPaymentIntergration.Controllers
 
         }
 
-        // GET: Orders/Create
-        public IActionResult Create()
-        {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address");
-            return View();
-        }
-
-        // POST: Orders/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OrderId,CustomerId,Status")] Order order)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address", order.CustomerId);
-            return View(order);
-        }
-
+        [Authorize(Roles = "Admin")]
         // GET: Orders/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -112,16 +115,16 @@ namespace PayPalPaymentIntergration.Controllers
             {
                 return NotFound();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address", order.CustomerId);
             return View(order);
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: Orders/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OrderId,CustomerId,Status")] Order order)
+        public async Task<IActionResult> Edit(int id, [Bind("OrderId,UserId,Status,OrderTime")] Order order)
         {
             if (id != order.OrderId)
             {
@@ -148,10 +151,10 @@ namespace PayPalPaymentIntergration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address", order.CustomerId);
             return View(order);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Orders/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -161,7 +164,6 @@ namespace PayPalPaymentIntergration.Controllers
             }
 
             var order = await _context.Orders
-                .Include(o => o.Customer)
                 .FirstOrDefaultAsync(m => m.OrderId == id);
             if (order == null)
             {
@@ -171,6 +173,7 @@ namespace PayPalPaymentIntergration.Controllers
             return View(order);
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: Orders/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

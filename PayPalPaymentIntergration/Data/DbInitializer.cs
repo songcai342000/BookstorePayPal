@@ -12,7 +12,7 @@ namespace PayPalPaymentIntergration.Data
         {
             context.Database.EnsureCreated();
 
-            // Look for any students.
+            // Look for any book.
             if (context.Books.Any())
             {
                 return;   // DB has been seeded
@@ -36,13 +36,13 @@ namespace PayPalPaymentIntergration.Data
                     Price = 299,
                     ImageUrl = "assets/askimgred.png"
                 }
-            } ;
+            };
             foreach (Book b in books)
             {
                 context.Books.Add(b);
             }
             context.SaveChanges();
-            var customers = new Customer[] {
+            /*var customers = new Customer[] {
 
                 new Customer
                 {
@@ -58,8 +58,8 @@ namespace PayPalPaymentIntergration.Data
             {
                 context.Customers.Add(c);
             }
-            context.SaveChanges();
-            var reservations = new Reservation[] {
+            context.SaveChanges();*/
+            /*var reservations = new Reservation[] {
 
                new Reservation
                {
@@ -85,7 +85,7 @@ namespace PayPalPaymentIntergration.Data
                 context.Reservations.Add(r);
             }
             context.SaveChanges();
-            var orders = new Order[] 
+            var orders = new Order[]
              {
 
                new Order
@@ -103,7 +103,7 @@ namespace PayPalPaymentIntergration.Data
             {
                 context.Orders.Add(o);
             }
-            context.SaveChanges();
+            context.SaveChanges();*/
         }
 
     }

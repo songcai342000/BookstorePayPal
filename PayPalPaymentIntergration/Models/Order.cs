@@ -10,10 +10,10 @@ namespace PayPalPaymentIntergration.Models
     {
         [Key]
         public int OrderId { get; set; }
-        public int CustomerId { get; set; }
+        public string UserId { get; set; }
         public virtual List<Reservation> Reservations { get; set; }
-        public virtual Customer Customer { get; set; }
         public string Status { get; set; }
+        public DateTime OrderTime { get; set; }
 
     }
 }
