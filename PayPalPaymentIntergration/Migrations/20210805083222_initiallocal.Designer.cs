@@ -10,8 +10,8 @@ using PayPalPaymentIntergration.Data;
 namespace PayPalPaymentIntergration.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210801112634_userIdString")]
-    partial class userIdString
+    [Migration("20210805083222_initiallocal")]
+    partial class initiallocal
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -258,9 +258,6 @@ namespace PayPalPaymentIntergration.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("OrderTime")
                         .HasColumnType("datetime2");
 
@@ -271,8 +268,6 @@ namespace PayPalPaymentIntergration.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("OrderId");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Orders");
                 });
@@ -348,15 +343,6 @@ namespace PayPalPaymentIntergration.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("PayPalPaymentIntergration.Models.Order", b =>
-                {
-                    b.HasOne("PayPalPaymentIntergration.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("PayPalPaymentIntergration.Models.Reservation", b =>

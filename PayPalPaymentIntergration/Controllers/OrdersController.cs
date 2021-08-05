@@ -12,6 +12,7 @@ using PayPalPaymentIntergration.Models;
 
 namespace PayPalPaymentIntergration.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -74,7 +75,7 @@ namespace PayPalPaymentIntergration.Controllers
         // GET: Orders/Checkout
         public async Task<IActionResult> Checkout()
         {
-     
+
             var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
             if (orders.Count() == 0)
             {
@@ -99,6 +100,37 @@ namespace PayPalPaymentIntergration.Controllers
 
             return View(cartItems);
 
+        }
+
+        [HttpGet]
+        // GET: Orders/GetOrderId
+        public async Task<IActionResult> PaymentSuccess()
+        {
+            var orderId = 0;
+            var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
+            if (orders == null)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (orders.Count() != 0)
+                    {
+                        Order order = orders.OrderBy(t => t.OrderTime).Last();
+                        order.Status = "Paid";
+                        _context.Update(order);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+            return View();
         }
 
         [Authorize(Roles = "Admin")]

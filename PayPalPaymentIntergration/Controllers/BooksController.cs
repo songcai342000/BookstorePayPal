@@ -28,18 +28,23 @@ namespace PayPalPaymentIntergration.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(int? id)
         {
+            var userId = _userManager.GetUserId(HttpContext.User);
             if (id != null)
             {
-                Order order = new Order { OrderId = 0, UserId = _userManager.GetUserId(HttpContext.User), Status = "Unpaid", OrderTime = DateTime.Now };
-                var orders = _context.Orders.Where(o => o.UserId == order.UserId && o.OrderTime > DateTime.Now.AddDays(-1)).Count();
+                if (userId == null)
+                {
+                    return Redirect("/Identity/Account/Login");
+                }
+                Order order = new Order { UserId = userId, Status = "Unpaid", OrderTime = DateTime.Now };
+                var orders = _context.Orders.Where(o => o.UserId == order.UserId && o.Status == "Unpaid" && o.OrderTime > DateTime.Now.AddDays(-1)).Count();
                 if (ModelState.IsValid && orders == 0)
                 {
                     _context.Add(order);
                     await _context.SaveChangesAsync();
                     //return RedirectToAction(nameof(Index));
                 }
-                var orderId = _context.Orders.Where(o => o.UserId == order.UserId).Select(o => o.OrderId).FirstOrDefault();
-                if (orderId != null)
+                var orderId = _context.Orders.Where(o => o.UserId == order.UserId).Select(s => s.OrderId).OrderBy(i => i).Last();
+                if (orderId != 0)
                 {
                     Reservation reservation = new Reservation { OrderId = orderId, BookId = (int)id };
                     _context.Add(reservation);

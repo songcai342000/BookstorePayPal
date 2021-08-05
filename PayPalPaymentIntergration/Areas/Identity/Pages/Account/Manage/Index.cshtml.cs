@@ -35,7 +35,7 @@ namespace PayPalPaymentIntergration.Areas.Identity.Pages.Account.Manage
         {
             [Required]
             //[RegularExpression(@"^[a-zA-ZåÅøæÆØÔôÙùŸÿÉéÇçÀàÄäÖö.'\-\s]*$", ErrorMessage = "The given name is not in correct format.")]
-            [RegularExpression(@"^[^'_!¤#&()=\?\+()\[\]{},<>\*\042\\]*$", ErrorMessage = "The given name is not in correct format.")]
+            [RegularExpression(@"^[^'_!¤#&()=\?\+()\[\]{},<>\*\042\\\d.]*$", ErrorMessage = "The given name is not in correct format.")]
             [Display(Name = "Full name")]
             public string Name { get; set; }
 

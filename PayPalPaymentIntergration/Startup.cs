@@ -52,7 +52,7 @@ namespace PayPalPaymentIntergration
                 options.Password.RequiredUniqueChars = 1;
 
                 // Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
 
@@ -115,7 +115,7 @@ namespace PayPalPaymentIntergration
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services)
         {
-            CreateUserRoles(services).Wait();
+            //CreateUserRoles(services).Wait();
 
             if (env.IsDevelopment())
             {
@@ -130,7 +130,7 @@ namespace PayPalPaymentIntergration
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseDefaultFiles();
             app.UseRouting();
 
             app.UseAuthentication();
