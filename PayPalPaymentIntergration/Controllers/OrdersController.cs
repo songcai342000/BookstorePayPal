@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PayPalPaymentIntergration.Data;
 using PayPalPaymentIntergration.Models;
+using Excel = Microsoft.Office.Interop.Excel;
+using Word = Microsoft.Office.Interop.Word;
+using System.IO;
+using System.Web;
 
 namespace PayPalPaymentIntergration.Controllers
 {
@@ -73,7 +77,7 @@ namespace PayPalPaymentIntergration.Controllers
         }
 
         // GET: Orders/Checkout
-        public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout(string? excel)
         {
 
             var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
@@ -97,9 +101,99 @@ namespace PayPalPaymentIntergration.Controllers
             {
                 return NotFound();
             }
+            else if (string.IsNullOrEmpty(excel))
+            {
+                return View(cartItems);
 
-            return View(cartItems);
+            }
+            else
+            {
+                var excelApp = new Excel.Application();
+                // Make the object visible.
+                excelApp.Visible = true;
 
+                // Create a new, empty workbook and add it to the collection returned
+                // by property Workbooks. The new workbook becomes the active workbook.
+                // Add has an optional parameter for specifying a praticular template.
+                // Because no argument is sent in this example, Add creates a new workbook.
+                excelApp.Workbooks.Add();
+
+                // This example uses a single workSheet. The explicit type casting is
+                // removed in a later procedure.
+                Excel._Worksheet workSheet = (Excel.Worksheet)excelApp.ActiveSheet;
+                object misValue = System.Reflection.Missing.Value;
+                // Establish column headings in cells A1 and B1.
+                workSheet.Cells[1, "A"] = "ID Number";
+                workSheet.Cells[1, "B"] = "Current Balance";
+                var row = 1;
+                foreach (var item in cartItems)
+                {
+                    row++;
+                    workSheet.Cells[row, "A"] = item.Title;
+                    workSheet.Cells[row, "B"] = item.Price;
+                }
+                workSheet.SaveAs("", Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue);
+                return View(cartItems);
+            }
+
+
+        }
+
+        //create excel 
+        public static void CreateExcel(IEnumerable<CartItem> cartItems)
+        {
+            string excelPath = "E:\\repos\\OrderDetails.xls";
+            Excel.Application xlApp;
+            Excel.Workbook xlWorkBook;
+            Excel.Worksheet xlWorkSheet;
+            object misValue = System.Reflection.Missing.Value;
+            try
+            {
+                //create the schema
+                xlApp = new Excel.Application();
+                xlWorkBook = xlApp.Workbooks.Add(misValue);
+                xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+
+                string cellName;
+                int counter = 1;
+                foreach (var item in cartItems)
+                {
+                    cellName = "A" + counter.ToString();
+                    var range = xlWorkSheet.get_Range(cellName, cellName);
+                    range.Value2 = item.ToString();
+                    ++counter;
+                }
+                //save the file
+                xlWorkBook.SaveAs("", Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
+                xlWorkBook.Close(true, misValue, misValue);
+                xlApp.Quit();
+
+                releaseObject(xlApp);
+                releaseObject(xlWorkBook);
+                releaseObject(xlWorkSheet);
+            }
+            catch (Exception excp)
+            {
+            }
+
+        }
+
+        //release office objects
+        private static void releaseObject(object obj)
+        {
+            try
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
+                obj = null;
+            }
+            catch
+            {
+                obj = null;
+            }
+            finally
+            {
+                GC.Collect();
+            }
         }
 
         [HttpGet]

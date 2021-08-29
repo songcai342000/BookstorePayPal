@@ -98,7 +98,7 @@ namespace PayPalPaymentIntergration
                 //create the roles and seed them to the database
                 roleResult = await RoleManager.CreateAsync(new IdentityRole("Admin"));
             }
-            //Adding Admin Role
+            //Adding Member Role
             var memberRoleCheck = await RoleManager.RoleExistsAsync("Member");
             if (!memberRoleCheck)
             {
@@ -108,7 +108,7 @@ namespace PayPalPaymentIntergration
             //Assign Admin role to the main User here we have given our newly registered 
             //login id for Admin management
             ApplicationUser user = await UserManager.FindByEmailAsync("songcai342000@yahoo.com");
-            var User = new IdentityUser();
+           // var User = new IdentityUser();
             await UserManager.AddToRoleAsync(user, "Admin");
         }
 

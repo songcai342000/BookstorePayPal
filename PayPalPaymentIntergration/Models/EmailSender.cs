@@ -37,7 +37,8 @@ namespace PayPalPaymentIntergration.Models
 				client.AuthenticationMechanisms.Remove("XOAUTH2");
 
 				await client.ConnectAsync("smtp.gmail.com", 587);
-				await client.AuthenticateAsync(Options.SendSMTPUser, Options.SendSMTPPassword);
+				//await client.AuthenticateAsync(Options.SendSMTPUser, Options.SendSMTPPassword);
+				await client.AuthenticateAsync("songcai342000@gmail.com", "1102sC!!");
 				await client.SendAsync(mimeEmail);
 				await client.DisconnectAsync(true);
 			}

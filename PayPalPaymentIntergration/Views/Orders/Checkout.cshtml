@@ -1,5 +1,4 @@
 ﻿@model IEnumerable<PayPalPaymentIntergration.Models.CartItem>
-@{
     ViewData["Title"] = "CartItems";
 }
 
@@ -32,27 +31,32 @@
         <tbody>
             @foreach (var item in Model)
             {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ImageUrl)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Quantity)
-                </td>
-                <td class="total">
-                    @Html.DisplayFor(modelItem => item.Total)
-                </td>
-               <td></td>
-            </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ImageUrl)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td class="total">
+                        @Html.DisplayFor(modelItem => item.Total)
+                    </td>
+                    <td></td>
+                </tr>
             }
         </tbody>
     </table>
+    <hr />
+    <form method="post">
+        <button asp-controller="Orders" asp-action="Checkout">Excel</button>
+    </form>
+
 </div>
 <div>
     <div id="checkout" class="w-25"></div>
@@ -65,8 +69,7 @@
 <script>
     let totals = document.getElementsByClassName('total');
     let v = 0;
-    for (let i = 0; i < totals.length; i++)
-    {
+    for (let i = 0; i < totals.length; i++) {
         v += parseInt(totals[i].innerHTML);
     }
     v.toString();
@@ -133,10 +136,10 @@
                 return actions.order.capture().then(function (details) {
 
                     // This function shows a transaction success message to your buyer.
-                   /* fetch('Orders/Edit' + id)
-                        .then(response => response.json())
-                        .then(data => _displayItems(data))
-                        .catch(error => console.error('Unable to get items.', error));*/
+                    /* fetch('Orders/Edit' + id)
+                         .then(response => response.json())
+                         .then(data => _displayItems(data))
+                         .catch(error => console.error('Unable to get items.', error));*/
                     alert('Transaction completed by ' + details.payer.name.given_name);
                     window.location.href = "/Orders/PaymentSuccess";
 
