@@ -55,6 +55,75 @@ namespace PayPalPaymentIntergration.Controllers
             ExamScores = new List<int>{ 96, 85, 91, 60}}
     };
 
+        protected static List<SubjectNumber> subjectNumbers = new List<SubjectNumber>()
+        {
+            new SubjectNumber {ID=1, Number=3},
+            new SubjectNumber {ID=2, Number=3},
+            new SubjectNumber {ID=3, Number=3},
+        };
+
+        //Show SubjectNumbers
+        public IActionResult SubjectNumbers()
+        {
+            return View(subjectNumbers.ToList());
+        }
+
+        //Create new SubjectNumber
+        public IActionResult CreateSubjectNumber()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateSubjectNumber([Bind("ID,Number")] SubjectNumber subjectNumber)
+        {
+            if (ModelState.IsValid)
+            {
+                subjectNumbers.Add(subjectNumber);
+                return RedirectToAction(nameof(SubjectNumbers));
+            }
+            return View(subjectNumber);
+        }
+
+        [HttpGet]
+        public IActionResult TotalSubjectNumber()
+        {
+            var totalSubjectNumber = subjectNumbers.Select(number => number.Number).Sum();
+            return View(totalSubjectNumber);
+        }
+
+        //events
+        protected static List<Event> events = new List<Event>()
+        {
+            new Event {Time=new DateTime(2021, 09, 17), EventItem="Consert"},
+            new Event {Time=DateTime.Now.AddDays(-3), EventItem="Consert"}
+        };
+
+        //Show SubjectNumbers
+        public IActionResult Events()
+        {
+            return View(events.ToList());
+        }
+
+        //Create new SubjectNumber
+        public IActionResult CreateEvent()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateEvent([Bind("Event,EventItem")] Event @event)
+        {
+            if (ModelState.IsValid)
+            {
+                events.Add(@event);
+                return RedirectToAction(nameof(Events));
+            }
+            return View(@event);
+        }
+
         [HttpGet]
         public IActionResult QueryHighScores(int exam, int score)
         {
@@ -65,16 +134,105 @@ namespace PayPalPaymentIntergration.Controllers
                 group student by student.LastName into newGroup
                 orderby newGroup.Key
                 select newGroup;
-
+            var groupMembers = new List<Student>();
             foreach (var nameGroup in queryLastNames)
             {
                 foreach (var student in nameGroup)
                 {
-                    return View(student);
+                    groupMembers.Add(student);
                 }
             }
 
-            return View(NotFound());
+            return View(groupMembers);
+        }
+
+        [HttpGet]
+        public IActionResult PetsAndOwners()
+        {
+            Person magnus = new Person { FirstName = "Magnus", LastName = "Hedlund" };
+            Person terry = new Person { FirstName = "Terry", LastName = "Adams" };
+            Person charlotte = new Person { FirstName = "Charlotte", LastName = "Weiss" };
+            Person arlene = new Person { FirstName = "Arlene", LastName = "Huff" };
+
+            Pet barley = new Pet { Name = "Barley", Owner = terry };
+            Pet boots = new Pet { Name = "Boots", Owner = terry };
+            Pet whiskers = new Pet { Name = "Whiskers", Owner = charlotte };
+            Pet bluemoon = new Pet { Name = "Blue Moon", Owner = terry };
+            Pet daisy = new Pet { Name = "Daisy", Owner = magnus };
+
+            // Create two lists.
+            List<Person> people = new List<Person> { magnus, terry, charlotte, arlene };
+            List<Pet> pets = new List<Pet> { barley, boots, whiskers, bluemoon, daisy };
+            // Create a list where each element is an anonymous type
+            // that contains the person's first name and a collection of
+            // pets that are owned by them.
+            var query = from person in people
+                        join pet in pets on person equals pet.Owner into gj
+                        select new PetsOwners { Owner = person.FirstName, Pets = gj.ToList() };
+
+
+            return View(query);
+        }
+
+        [HttpGet]
+        public IActionResult PersonsPets()
+        {
+            Person magnus = new Person { FirstName = "Magnus", LastName = "Hedlund" };
+            Person terry = new Person { FirstName = "Terry", LastName = "Adams" };
+            Person charlotte = new Person { FirstName = "Charlotte", LastName = "Weiss" };
+            Person arlene = new Person { FirstName = "Arlene", LastName = "Huff" };
+
+            Pet barley = new Pet { Name = "Barley", Owner = terry };
+            Pet boots = new Pet { Name = "Boots", Owner = terry };
+            Pet whiskers = new Pet { Name = "Whiskers", Owner = charlotte };
+            Pet bluemoon = new Pet { Name = "Blue Moon", Owner = terry };
+            Pet daisy = new Pet { Name = "Daisy", Owner = magnus };
+
+            // Create two lists.
+            List<Person> people = new List<Person> { magnus, terry, charlotte, arlene };
+            List<Pet> pets = new List<Pet> { barley, boots, whiskers, bluemoon, daisy };
+
+            var query = from person in people
+                        join pet in pets on person equals pet.Owner into gj
+                        from subpet in gj.DefaultIfEmpty()
+                        select new PersonsPets { FirstName = person.FirstName, PetName = subpet?.Name ?? String.Empty };
+
+            return View(query);
+        }
+
+        [HttpGet]
+        public IActionResult GroupJoin2()
+        {
+            Person magnus = new Person { FirstName = "Magnus", LastName = "Hedlund" };
+            Person terry = new Person { FirstName = "Terry", LastName = "Adams" };
+            Person charlotte = new Person { FirstName = "Charlotte", LastName = "Weiss" };
+            Person arlene = new Person { FirstName = "Arlene", LastName = "Huff" };
+
+            Pet barley = new Pet { Name = "Barley", Owner = terry };
+            Pet boots = new Pet { Name = "Boots", Owner = terry };
+            Pet whiskers = new Pet { Name = "Whiskers", Owner = charlotte };
+            Pet bluemoon = new Pet { Name = "Blue Moon", Owner = terry };
+            Pet daisy = new Pet { Name = "Daisy", Owner = magnus };
+
+            // Create two lists.
+            List<Person> people = new List<Person> { magnus, terry, charlotte, arlene };
+            List<Pet> pets = new List<Pet> { barley, boots, whiskers, bluemoon, daisy };
+
+            // Create a list where each element is an anonymous
+            // type that contains a person's name and
+            // a collection of names of the pets they own.
+            var query =
+                people.GroupJoin(pets,
+                                 person => person,
+                                 pet => pet.Owner,
+                                 (person, petCollection) =>
+                                     new PetsOwners
+                                     {
+                                         Owner = person.FirstName,
+                                         Pets = petCollection.ToList()
+                                     });
+
+            return View(query);
         }
     }
 }

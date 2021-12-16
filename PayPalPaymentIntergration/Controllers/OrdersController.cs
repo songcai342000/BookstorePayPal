@@ -108,7 +108,7 @@ namespace PayPalPaymentIntergration.Controllers
             }
             else
             {
-                var excelApp = new Excel.Application();
+                /*var excelApp = new Excel.Application();
                 // Make the object visible.
                 excelApp.Visible = true;
 
@@ -133,7 +133,8 @@ namespace PayPalPaymentIntergration.Controllers
                     workSheet.Cells[row, "B"] = item.Price;
                 }
                 workSheet.SaveAs("", Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue);
-                return View(cartItems);
+                return View(cartItems);*/
+                return null;
             }
 
 

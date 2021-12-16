@@ -23,10 +23,15 @@ namespace PayPalPaymentIntergration.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _sender;
 
-        public RegisterConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender sender)
+        /* public RegisterConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender sender)
+         {
+             _userManager = userManager;
+             _sender = sender;
+         }*/
+
+        public RegisterConfirmationModel(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
-            _sender = sender;
         }
 
         public string Email { get; set; }
@@ -50,7 +55,7 @@ namespace PayPalPaymentIntergration.Areas.Identity.Pages.Account
 
             Email = email;
             // Once you add a real email sender, you should remove this code that lets you confirm the account
-            DisplayConfirmAccountLink = true;
+            DisplayConfirmAccountLink = false;
             if (DisplayConfirmAccountLink)
             {
                 var userId = await _userManager.GetUserIdAsync(user);

@@ -1,6 +1,8 @@
 ﻿@model IEnumerable<PayPalPaymentIntergration.Models.CartItem>
+@{
     ViewData["Title"] = "CartItems";
 }
+
 
 <h1>Details</h1>
 
@@ -53,9 +55,7 @@
         </tbody>
     </table>
     <hr />
-    <form method="post">
-        <button asp-controller="Orders" asp-action="Checkout">Excel</button>
-    </form>
+
 
 </div>
 <div>
