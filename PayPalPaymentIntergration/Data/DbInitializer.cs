@@ -17,14 +17,29 @@ namespace PayPalPaymentIntergration.Data
             {
                 return;   // DB has been seeded
             }
+            var genres = new Genre[] {
 
+                new Genre
+                {
+                    Name = "Fiction"
+                },
+                new Genre
+                {
+                    Name = "Music"
+                }
+            };
+            foreach (Genre g in genres)
+            {
+                context.Genres.Add(g);
+            }
+            context.SaveChanges();
             var books = new Book[] {
 
                 new Book
                 {
                     Title = "Raghuvamsa Sudha",
                     Introduction = "The collection of the lyrics of the most popular of Sara Mingten",
-                    Genre = "Music",
+                    GenreId = genres.Single(g => g.Name == "Fiction").GenreId,
                     Price = 199,
                     ImageUrl = "assets/askimgreen.png"
                 },
@@ -32,7 +47,7 @@ namespace PayPalPaymentIntergration.Data
                 {
                     Title = "Yellow roses",
                     Introduction = "An astronaut fant some flowers on Mars",
-                    Genre = "Fiction",
+                    GenreId = genres.Single(g => g.Name == "Music").GenreId,
                     Price = 299,
                     ImageUrl = "assets/askimgred.png"
                 }

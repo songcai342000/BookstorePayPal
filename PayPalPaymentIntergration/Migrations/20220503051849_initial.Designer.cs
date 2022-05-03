@@ -10,8 +10,8 @@ using PayPalPaymentIntergration.Data;
 namespace PayPalPaymentIntergration.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210805083222_initiallocal")]
-    partial class initiallocal
+    [Migration("20220503051849_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -231,8 +231,8 @@ namespace PayPalPaymentIntergration.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Genre")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("GenreId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -248,7 +248,24 @@ namespace PayPalPaymentIntergration.Migrations
 
                     b.HasKey("BookId");
 
+                    b.HasIndex("GenreId");
+
                     b.ToTable("Books");
+                });
+
+            modelBuilder.Entity("PayPalPaymentIntergration.Models.Genre", b =>
+                {
+                    b.Property<int>("GenreId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GenreId");
+
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("PayPalPaymentIntergration.Models.Order", b =>
@@ -345,10 +362,21 @@ namespace PayPalPaymentIntergration.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PayPalPaymentIntergration.Models.Book", b =>
+                {
+                    b.HasOne("PayPalPaymentIntergration.Models.Genre", "Genre")
+                        .WithMany("Books")
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Genre");
+                });
+
             modelBuilder.Entity("PayPalPaymentIntergration.Models.Reservation", b =>
                 {
                     b.HasOne("PayPalPaymentIntergration.Models.Book", "Book")
-                        .WithMany()
+                        .WithMany("Reservations")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -362,6 +390,16 @@ namespace PayPalPaymentIntergration.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("PayPalPaymentIntergration.Models.Book", b =>
+                {
+                    b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("PayPalPaymentIntergration.Models.Genre", b =>
+                {
+                    b.Navigation("Books");
                 });
 
             modelBuilder.Entity("PayPalPaymentIntergration.Models.Order", b =>

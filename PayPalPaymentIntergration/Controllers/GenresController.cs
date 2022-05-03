@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,23 +11,23 @@ using PayPalPaymentIntergration.Models;
 
 namespace PayPalPaymentIntergration.Controllers
 {
-    public class ReservationsController : Controller
+    [Authorize(Roles = "Admin")]
+    public class GenresController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public ReservationsController(ApplicationDbContext context)
+        public GenresController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Reservations
+        // GET: Genres
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Reservations.Include(r => r.Book).Include(r => r.Order);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _context.Genres.ToListAsync());
         }
 
-        // GET: Reservations/Details/5
+        // GET: Genres/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,68 +35,62 @@ namespace PayPalPaymentIntergration.Controllers
                 return NotFound();
             }
 
-            var reservation = await _context.Reservations
-                .Include(r => r.Book)
-                .Include(r => r.Order)
-                .FirstOrDefaultAsync(m => m.ReservationId == id);
-            if (reservation == null)
+            var genre = await _context.Genres
+                .FirstOrDefaultAsync(m => m.GenreId == id);
+            if (genre == null)
             {
                 return NotFound();
             }
 
-            return View(reservation);
+            return View(genre);
         }
 
-        // GET: Reservations/Create
+        // GET: Genres/Create
         public IActionResult Create()
         {
-            ViewData["BookId"] = new SelectList(_context.Books, "BookId", "BookId");
-            ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId");
             return View();
         }
 
-        // POST: Reservations/Create
+        // POST: Genres/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReservationId,OrderId,BookId")] Reservation reservation)
+        public async Task<IActionResult> Create([Bind("GenreId,Name")] Genre genre)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(reservation);
+                _context.Add(genre);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(reservation);
+            return View(genre);
         }
 
-        // GET: Reservations/Edit/5
+        // GET: Genres/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewData["BookId"] = new SelectList(_context.Books, "BookId", "BookId");
-            ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId");
             if (id == null)
             {
                 return NotFound();
             }
 
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation == null)
+            var genre = await _context.Genres.FindAsync(id);
+            if (genre == null)
             {
                 return NotFound();
             }
-            return View(reservation);
+            return View(genre);
         }
 
-        // POST: Reservations/Edit/5
+        // POST: Genres/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReservationId,OrderId,BookId")] Reservation reservation)
+        public async Task<IActionResult> Edit(int id, [Bind("GenreId,Name")] Genre genre)
         {
-            if (id != reservation.ReservationId)
+            if (id != genre.GenreId)
             {
                 return NotFound();
             }
@@ -104,12 +99,12 @@ namespace PayPalPaymentIntergration.Controllers
             {
                 try
                 {
-                    _context.Update(reservation);
+                    _context.Update(genre);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReservationExists(reservation.ReservationId))
+                    if (!GenreExists(genre.GenreId))
                     {
                         return NotFound();
                     }
@@ -120,10 +115,10 @@ namespace PayPalPaymentIntergration.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(reservation);
+            return View(genre);
         }
 
-        // GET: Reservations/Delete/5
+        // GET: Genres/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -131,32 +126,30 @@ namespace PayPalPaymentIntergration.Controllers
                 return NotFound();
             }
 
-            var reservation = await _context.Reservations
-                .Include(r => r.Book)
-                .Include(r => r.Order)
-                .FirstOrDefaultAsync(m => m.ReservationId == id);
-            if (reservation == null)
+            var genre = await _context.Genres
+                .FirstOrDefaultAsync(m => m.GenreId == id);
+            if (genre == null)
             {
                 return NotFound();
             }
 
-            return View(reservation);
+            return View(genre);
         }
 
-        // POST: Reservations/Delete/5
+        // POST: Genres/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
-            _context.Reservations.Remove(reservation);
+            var genre = await _context.Genres.FindAsync(id);
+            _context.Genres.Remove(genre);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ReservationExists(int id)
+        private bool GenreExists(int id)
         {
-            return _context.Reservations.Any(e => e.ReservationId == id);
+            return _context.Genres.Any(e => e.GenreId == id);
         }
     }
 }

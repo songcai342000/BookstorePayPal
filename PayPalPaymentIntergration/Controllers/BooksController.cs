@@ -73,14 +73,17 @@ namespace PayPalPaymentIntergration.Controllers
         }
 
         // GET: Books/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
+            ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "Name");
             return View();
         }
 
         // POST: Books/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BookId,Title,Introduction,Genre,Price,ImageUrl")] Book book)
@@ -118,10 +121,11 @@ namespace PayPalPaymentIntergration.Controllers
 
             return View(await _context.Books.ToListAsync());
         }*/
-
+        [Authorize(Roles = "Admin")]
         // GET: Books/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "Name");
             if (id == null)
             {
                 return NotFound();
@@ -138,6 +142,7 @@ namespace PayPalPaymentIntergration.Controllers
         // POST: Books/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BookId,Title,Introduction,Genre,Price,ImageUrl")] Book book)
@@ -170,6 +175,7 @@ namespace PayPalPaymentIntergration.Controllers
             return View(book);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Books/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -188,6 +194,7 @@ namespace PayPalPaymentIntergration.Controllers
             return View(book);
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: Books/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

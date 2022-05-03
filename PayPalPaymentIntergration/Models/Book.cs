@@ -12,9 +12,12 @@ namespace PayPalPaymentIntergration.Models
         public int BookId { get; set; }
         public string Title { get; set; }
         public string Introduction { get; set; }
-        public string Genre { get; set; }
+        public int GenreId { get; set; }
         public double Price { get; set; }
         public string ImageUrl { get; set; }
+        public Genre Genre { get; set; }
+        public virtual List<Reservation> Reservations { get; set; }
+
 
     }
 }

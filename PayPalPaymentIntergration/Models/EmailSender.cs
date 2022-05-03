@@ -22,7 +22,7 @@ namespace PayPalPaymentIntergration.Models
 		{
 			var mimeEmail = new MimeMessage();
 			mimeEmail.Subject = subject;
-			mimeEmail.From.Add(new MailboxAddress("Shop", "songcai342000@gmail.com"));
+			mimeEmail.From.Add(new MailboxAddress("Shop", "*******@gmail.com"));
 			mimeEmail.To.Add(new MailboxAddress("User", email));
 
 			//email.Body = new TextPart("plain")
@@ -38,7 +38,7 @@ namespace PayPalPaymentIntergration.Models
 
 				await client.ConnectAsync("smtp.gmail.com", 587);
 				//await client.AuthenticateAsync(Options.SendSMTPUser, Options.SendSMTPPassword);
-				await client.AuthenticateAsync("songcai342000@gmail.com", "********");
+				await client.AuthenticateAsync("******@gmail.com", "********");
 				await client.SendAsync(mimeEmail);
 				await client.DisconnectAsync(true);
 			}

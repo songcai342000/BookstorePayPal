@@ -77,70 +77,45 @@ namespace PayPalPaymentIntergration.Controllers
         }
 
         // GET: Orders/Checkout
-        public async Task<IActionResult> Checkout(string? excel)
+        public async Task<IActionResult> Checkout()
         {
-
-            var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
-            if (orders.Count() == 0)
+            try
             {
-                return NotFound("You haven't chosen any item yet!");
-            }
-            var orderId = orders.OrderBy(t => t.OrderTime).Select(d => d.OrderId).Last();
-            var books = (from o in _context.Orders join r in _context.Reservations on o.OrderId equals r.OrderId where o.OrderId == orderId select r).AsEnumerable().GroupBy(r => r.BookId);
-            var cartItems = from bc in _context.Books.AsEnumerable()
-                            join bs in books on bc.BookId equals bs.Key
-                            select new CartItem
-                            {
-                                Title = bc.Title,
-                                Price = bc.Price,
-                                ImageUrl = bc.ImageUrl,
-                                Quantity = bs.Count(),
-                                Total = bc.Price * bs.Count()
-                            };
-            if (cartItems == null)
-            {
-                return NotFound();
-            }
-            else if (string.IsNullOrEmpty(excel))
-            {
-                return View(cartItems);
-
-            }
-            else
-            {
-                /*var excelApp = new Excel.Application();
-                // Make the object visible.
-                excelApp.Visible = true;
-
-                // Create a new, empty workbook and add it to the collection returned
-                // by property Workbooks. The new workbook becomes the active workbook.
-                // Add has an optional parameter for specifying a praticular template.
-                // Because no argument is sent in this example, Add creates a new workbook.
-                excelApp.Workbooks.Add();
-
-                // This example uses a single workSheet. The explicit type casting is
-                // removed in a later procedure.
-                Excel._Worksheet workSheet = (Excel.Worksheet)excelApp.ActiveSheet;
-                object misValue = System.Reflection.Missing.Value;
-                // Establish column headings in cells A1 and B1.
-                workSheet.Cells[1, "A"] = "ID Number";
-                workSheet.Cells[1, "B"] = "Current Balance";
-                var row = 1;
-                foreach (var item in cartItems)
+                var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
+                if (orders.Count() == 0)
                 {
-                    row++;
-                    workSheet.Cells[row, "A"] = item.Title;
-                    workSheet.Cells[row, "B"] = item.Price;
+                    return NotFound("You haven't chosen any item yet!");
                 }
-                workSheet.SaveAs("", Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue);
-                return View(cartItems);*/
-                return null;
+                var orderId = orders.OrderBy(t => t.OrderTime).Select(d => d.OrderId).Last();
+                var books = (from o in _context.Orders join r in _context.Reservations on o.OrderId equals r.OrderId where o.OrderId == orderId select r).AsEnumerable().GroupBy(r => r.BookId);
+                var cartItems = from bc in _context.Books.AsEnumerable()
+                                join bs in books on bc.BookId equals bs.Key
+                                select new CartItem
+                                {
+                                    Title = bc.Title,
+                                    Price = bc.Price,
+                                    ImageUrl = bc.ImageUrl,
+                                    Quantity = bs.Count(),
+                                    Total = bc.Price * bs.Count()
+                                };
+                if (cartItems == null)
+                {
+                    return NotFound();
+                }
+                await Task.Delay(1000);
+                return View(cartItems);
             }
+            catch(Exception ex)
+            {
 
+            }
+           
+            return NotFound();
 
         }
 
-        //create excel 
+
+        //create excel -- not in use
         public static void CreateExcel(IEnumerable<CartItem> cartItems)
         {
             string excelPath = "E:\\repos\\OrderDetails.xls";
@@ -173,8 +148,9 @@ namespace PayPalPaymentIntergration.Controllers
                 releaseObject(xlWorkBook);
                 releaseObject(xlWorkSheet);
             }
-            catch (Exception excp)
+            catch (Exception ex)
             {
+                throw new Exception(ex.Message);
             }
 
         }
