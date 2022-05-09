@@ -107,7 +107,7 @@ namespace PayPalPaymentIntergration.Controllers
             }
             catch(Exception ex)
             {
-
+                throw new Exception(ex.Message);
             }
            
             return NotFound();
@@ -155,7 +155,7 @@ namespace PayPalPaymentIntergration.Controllers
 
         }
 
-        //release office objects
+        //release office objects  -- not in use
         private static void releaseObject(object obj)
         {
             try
@@ -173,11 +173,11 @@ namespace PayPalPaymentIntergration.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         // GET: Orders/GetOrderId
-        public async Task<IActionResult> PaymentSuccess()
+        public async Task<IActionResult> PaymentSuccess(Status status)
         {
-            var orderId = 0;
             var orders = from i in _context.Orders where i.UserId == _userManager.GetUserId(HttpContext.User) && i.Status == "Unpaid" && i.OrderTime > DateTime.Now.AddDays(-1) select i;
             if (orders == null)
             {
@@ -190,7 +190,7 @@ namespace PayPalPaymentIntergration.Controllers
                     if (orders.Count() != 0)
                     {
                         Order order = orders.OrderBy(t => t.OrderTime).Last();
-                        order.Status = "Paid";
+                        order.Status = status.PaymentStatus;
                         _context.Update(order);
                         await _context.SaveChangesAsync();
                     }

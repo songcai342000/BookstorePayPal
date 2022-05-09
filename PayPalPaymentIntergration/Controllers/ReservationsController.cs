@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +15,20 @@ namespace PayPalPaymentIntergration.Controllers
     public class ReservationsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ReservationsController(ApplicationDbContext context)
+        public ReservationsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
+
 
         // GET: Reservations
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Reservations.Include(r => r.Book).Include(r => r.Order);
+            var userId = _userManager.GetUserId(HttpContext.User);
+            var applicationDbContext = _context.Reservations.Include(r => r.Book).Include(r => r.Order).Where(w => w.Order.UserId == userId && w.Order.Status == "Unpaid");
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -70,58 +76,7 @@ namespace PayPalPaymentIntergration.Controllers
             return View(reservation);
         }
 
-        // GET: Reservations/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            ViewData["BookId"] = new SelectList(_context.Books, "BookId", "BookId");
-            ViewData["OrderId"] = new SelectList(_context.Orders, "OrderId", "OrderId");
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation == null)
-            {
-                return NotFound();
-            }
-            return View(reservation);
-        }
-
-        // POST: Reservations/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReservationId,OrderId,BookId")] Reservation reservation)
-        {
-            if (id != reservation.ReservationId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(reservation);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ReservationExists(reservation.ReservationId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(reservation);
-        }
+       
 
         // GET: Reservations/Delete/5
         public async Task<IActionResult> Delete(int? id)

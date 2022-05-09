@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<PayPalPaymentIntergration.Models.CartItem>
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
 @{
     ViewData["Title"] = "CartItems";
 }
@@ -64,7 +67,7 @@
 <div>
     <a asp-action="Index" asp-controller="Books">Back to List</a>
 </div>
-<script src="https://www.paypal.com/sdk/js?client-id=AWduqFNet_25HUONAefCkkGFjnz-Bvhaax5pu6gGjqRDdhpgbTxLOWCTB2UpXrcH1g6la8mvWclddJdL"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=AWduqFNet_25HUONAefCkkGFjnz-Bvhaax5pu6gGjqRDdhpgbTxLOWCTB2UpXrcH1g6la8mvWclddJdL&intent=capture"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
     let totals = document.getElementsByClassName('total');
@@ -96,8 +99,7 @@
 
             },
             onApprove: function (data, actions) {
-
-
+                v = 0;
                 // Authorize the transaction
 
                 actions.order.authorize().then(function (authorization) {
@@ -109,10 +111,9 @@
 
                         .payments.authorizations[0].id
 
-
                     // Call your server to validate and capture the transaction
 
-                    return fetch('/paypal-transaction-complete', {
+                    fetch('/paypal-transaction-complete', {
 
                         method: 'post',
 
@@ -129,20 +130,7 @@
                             authorizationID: authorizationID
 
                         })
-
-                    });
-
-                });
-                return actions.order.capture().then(function (details) {
-
-                    // This function shows a transaction success message to your buyer.
-                    /* fetch('Orders/Edit' + id)
-                         .then(response => response.json())
-                         .then(data => _displayItems(data))
-                         .catch(error => console.error('Unable to get items.', error));*/
-                    alert('Transaction completed by ' + details.payer.name.given_name);
-                    window.location.href = "/Orders/PaymentSuccess";
-
+                    })
                 });
             },
             onCancel: function (data) {
@@ -151,11 +139,8 @@
             onError: function (err) {
 
                 // For example, redirect to a specific error page
-                alert(err);
-                window.location.href = "/Orders/TransactionErrors";
-
+                window.location.href = '/Orders/TransactionErrors';
             }
         }
     ).render('#checkout');
-    let myOrderId = getMyOrderId();
 </script>

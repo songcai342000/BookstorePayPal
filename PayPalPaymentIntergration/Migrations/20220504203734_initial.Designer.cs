@@ -10,7 +10,7 @@ using PayPalPaymentIntergration.Data;
 namespace PayPalPaymentIntergration.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220503051849_initial")]
+    [Migration("20220504203734_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,7 +18,7 @@ namespace PayPalPaymentIntergration.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.8")
+                .HasAnnotation("ProductVersion", "5.0.16")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

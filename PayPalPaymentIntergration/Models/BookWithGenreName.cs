@@ -6,18 +6,15 @@ using System.Threading.Tasks;
 
 namespace PayPalPaymentIntergration.Models
 {
-    public class Book
+    public class BookWithGenreName
     {
         [Key]
         public int BookId { get; set; }
         public string Title { get; set; }
         public string Introduction { get; set; }
-        public int GenreId { get; set; }
+        public string Genre { get; set; }
         public double Price { get; set; }
         public string ImageUrl { get; set; }
-        public virtual Genre Genre { get; set; }
-        public virtual List<Reservation> Reservations { get; set; }
-
 
     }
 }

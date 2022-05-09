@@ -12,16 +12,25 @@ using PayPalPaymentIntergration.Models;
 
 namespace PayPalPaymentIntergration.Controllers
 {
-    public class BooksController : Controller
+    public class BooksController1 : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public BooksController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public BooksController1(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
+
+        
+        // GET: Books
+        /*public async Task<IActionResult> Index()
+        {
+            ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "Name");
+
+            return View(await _context.Books.ToListAsync());
+        }*/
 
 
         [AllowAnonymous]
@@ -55,7 +64,6 @@ namespace PayPalPaymentIntergration.Controllers
                         join g in _context.Genres on b.GenreId equals g.GenreId
                         select new BookWithGenreName
                         {
-                            BookId = b.BookId,
                             Title = b.Title,
                             Introduction = b.Introduction,
                             Price = b.Price,
@@ -65,6 +73,7 @@ namespace PayPalPaymentIntergration.Controllers
             return View(await books.ToListAsync());
         }
 
+        [AllowAnonymous]
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -80,7 +89,6 @@ namespace PayPalPaymentIntergration.Controllers
             {
                 return NotFound();
             }
-
             return View(book);
         }
 
@@ -110,8 +118,8 @@ namespace PayPalPaymentIntergration.Controllers
             return View(book);
         }
 
-        // GET: Books/Edit/5
         [Authorize(Roles = "Admin")]
+        // GET: Books/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -165,8 +173,8 @@ namespace PayPalPaymentIntergration.Controllers
             return View(book);
         }
 
-        // GET: Books/Delete/5
         [Authorize(Roles = "Admin")]
+        // GET: Books/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -185,8 +193,8 @@ namespace PayPalPaymentIntergration.Controllers
             return View(book);
         }
 
-        // POST: Books/Delete/5
         [Authorize(Roles = "Admin")]
+        // POST: Books/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
